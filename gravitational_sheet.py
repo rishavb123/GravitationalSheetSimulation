@@ -56,7 +56,10 @@ def force(z):
     return G * m * sigma * z * double_simpsons(lambda x, y: f(x, y, z), ax, bx, ay, by, N=100)
 
 def transform(z, w):
-    return (0, -z)
+    return (width / 2 - w / 2, -z/15 * height + 2 * height / 3)
+
+def detransform(x, y):
+    return (15/height * (height/3 - y), width - 2 * x)
 
 # print(force(z))
 
@@ -74,30 +77,41 @@ class Sheet:
         self.m = M
         self.h = 25
 
-    def update(self, dt):
-        self.v += -force(ball.z - sheet.z) / self.m * dt
-        self.z += self.v * dt
+    def update(self, F, total_dt):
+        n = 10
+        for _ in range(n):
+            dt = total_dt / n
+            self.v += F / self.m * dt
+            self.z += self.v * dt
         
     def draw(self):
         x, y = transform(self.z, self.w)
-        pygame.draw.rect(surface, 'blue', [int(x), int(y), int(self.w), int(self.h)])
+        pygame.draw.rect(surface, (0, 0, 255), [int(x), int(y), int(self.w), int(self.h)])
 
 class Ball:
 
     def __init__(self, z):
         self.w = 50
         self.z = z
-        self.v = 0
+        self.v = -5
         self.m = m
         self.h = 50
 
-    def update(self, dt):
-        self.v += force(ball.z - sheet.z) / self.m * dt
-        self.z += self.v * dt
+    def update(self, F, total_dt, sheet):
+        n = 10
+        for _ in range(n):
+            dt = total_dt / 10
+            x, y = transform(self.z, self.w)
+            sheet_x, sheet_y = transform(sheet.z, sheet.w)
+            self.v += F / self.m * dt
+            if y + self.h > sheet_y:
+                self.z = sheet.z + detransform(0, self.h)[0]
+                self.v = abs(self.v)
+            self.z += self.v * dt
         
     def draw(self):
         x, y = transform(self.z, self.w)
-        pygame.draw.circle(surface, 'red', [int(x + self.w/2), int(y + self.h/2)], int(self.w/2))
+        pygame.draw.circle(surface, (255, 0, 0), [int(x + self.w/2), int(y + self.h/2)], int(self.w/2))
 
 sheet = Sheet(0)
 ball = Ball(z)
@@ -110,11 +124,22 @@ while True:
             pygame.quit()
             quit()  
 
+    surface.fill((255, 255, 255))
+
     next_time = time.time()
 
-    sheet.update(next_time - current_time)
-    ball.update(next_time - current_time)
+    dt = next_time - current_time
+    F = force(ball.z - sheet.z)
+
+    # F = F / abs(F)
+
+    print(-F, ball.v, ball.z)
+
+    sheet.update(F, dt)
+    ball.update(-F, dt, sheet)
     sheet.draw()
     ball.draw()
 
     current_time = next_time
+
+    pygame.display.update()
