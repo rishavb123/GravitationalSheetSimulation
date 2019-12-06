@@ -8,9 +8,7 @@ L = 10 # m
 W = 10 # m
 z = 10 # m
 M = 10000 # kg
-A = L * W # m^2
-sigma = M / A # kg / m^2
-ax = -L / 2 # m
-bx = L / 2 # m
-ay = -W / 2 # m
-by = W / 2 # m
+m = 10 # kg
+
+width = 800
+height = 600

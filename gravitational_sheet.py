@@ -25,8 +25,18 @@ import numpy as np
 import pylab
 from config import *
 import pygame
+import time
 
 pygame.init()
+
+A = L * W # m^2
+sigma = M / A # kg / m^2
+ax = -L / 2 # m
+bx = L / 2 # m
+ay = -W / 2 # m
+by = W / 2 # m
+
+surface = pygame.display.set_mode((width, height))
 
 def f(x, y, z):
     return 1/(x**2 + y**2 + z**2) ** 1.5
@@ -43,7 +53,10 @@ def double_simpsons(f, a, b, c, d, N = 10):
     return simpsons(F, c, d, N)
 
 def force(z):
-    return double_simpsons(lambda x, y: f(x, y, z), ax, bx, ay, by, N=100)
+    return G * m * sigma * z * double_simpsons(lambda x, y: f(x, y, z), ax, bx, ay, by, N=100)
+
+def transform(z, w):
+    return (0, -z)
 
 # print(force(z))
 
@@ -51,3 +64,57 @@ def force(z):
 # ys = [force(x_s) for x_s in xs]
 # pylab.plot(xs, ys)
 # pylab.show()
+
+class Sheet:
+
+    def __init__(self, z):
+        self.w = 400
+        self.z = z
+        self.v = 0
+        self.m = M
+        self.h = 25
+
+    def update(self, dt):
+        self.v += -force(ball.z - sheet.z) / self.m * dt
+        self.z += self.v * dt
+        
+    def draw(self):
+        x, y = transform(self.z, self.w)
+        pygame.draw.rect(surface, 'blue', [int(x), int(y), int(self.w), int(self.h)])
+
+class Ball:
+
+    def __init__(self, z):
+        self.w = 50
+        self.z = z
+        self.v = 0
+        self.m = m
+        self.h = 50
+
+    def update(self, dt):
+        self.v += force(ball.z - sheet.z) / self.m * dt
+        self.z += self.v * dt
+        
+    def draw(self):
+        x, y = transform(self.z, self.w)
+        pygame.draw.circle(surface, 'red', [int(x + self.w/2), int(y + self.h/2)], int(self.w/2))
+
+sheet = Sheet(0)
+ball = Ball(z)
+
+current_time = time.time()
+
+while True:
+    for event in pygame.event.get():   
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            quit()  
+
+    next_time = time.time()
+
+    sheet.update(next_time - current_time)
+    ball.update(next_time - current_time)
+    sheet.draw()
+    ball.draw()
+
+    current_time = next_time
