@@ -23,26 +23,13 @@ Now, to calculate this.
 # imports
 import numpy as np
 import pylab
+from config import *
+import pygame
 
-# define constants
-
-G = 6.674e-11 # m^3kg^-1s^-2
+pygame.init()
 
 def f(x, y, z):
     return 1/(x**2 + y**2 + z**2) ** 1.5
-
-# define parameters
-
-L = 10 # m
-W = 10 # m
-z = 10 # m
-M = 10000 # kg
-A = L * W # m^2
-sigma = M / A # kg / m^2
-ax = -L / 2 # m
-bx = L / 2 # m
-ay = -W / 2 # m
-by = W / 2 # m
 
 #define some functions
 
@@ -58,9 +45,9 @@ def double_simpsons(f, a, b, c, d, N = 10):
 def force(z):
     return double_simpsons(lambda x, y: f(x, y, z), ax, bx, ay, by, N=100)
 
-print(force(z))
+# print(force(z))
 
-xs = np.linspace(0.1, 10, 100)
-ys = [force(x_s) for x_s in xs]
-pylab.plot(xs, ys)
-pylab.show()
+# xs = np.linspace(0.1, 10, 100)
+# ys = [force(x_s) for x_s in xs]
+# pylab.plot(xs, ys)
+# pylab.show()
