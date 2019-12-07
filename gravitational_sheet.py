@@ -109,6 +109,8 @@ class Ball:
                 self.v = abs(self.v)
             self.z += self.v * dt
         
+        self.v = self.v * min(abs(self.v), 3) / abs(self.v)
+
     def draw(self):
         x, y = transform(self.z, self.w)
         pygame.draw.circle(surface, (255, 0, 0), [int(x + self.w/2), int(y + self.h/2)], int(self.w/2))

@@ -1,7 +1,7 @@
 # define some constants
 
 G = 6.674e-11 # m^3kg^-1s^-2
-G = 1e-3
+G = 1e-1
 
 #define some parameters
 
